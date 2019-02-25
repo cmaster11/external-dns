@@ -1264,7 +1264,7 @@ func TestNodePortServices(t *testing.T) {
 			map[string]string{},
 			map[string]string{
 				hostnameAnnotationKey:   "foo.example.org.",
-				nodeAnnotationFilterKey: "workload=testing",
+				nodeLabelFilterKey: "workload=testing",
 			},
 			nil,
 			[]*endpoint.Endpoint{
@@ -1275,7 +1275,7 @@ func TestNodePortServices(t *testing.T) {
 			[]*v1.Node{{
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "node1",
-					Annotations: map[string]string{
+					Labels: map[string]string{
 						"workload": "testing",
 					},
 				},
@@ -1296,7 +1296,7 @@ func TestNodePortServices(t *testing.T) {
 			}, {
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "node3",
-					Annotations: map[string]string{
+					Labels: map[string]string{
 						"workload": "testing",
 					},
 				},
