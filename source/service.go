@@ -54,10 +54,11 @@ type serviceSource struct {
 	publishInternal       bool
 	publishHostIP         bool
 	serviceTypeFilter     map[string]struct{}
+	servicePublishIPsType string
 }
 
 // NewServiceSource creates a new serviceSource with the given config.
-func NewServiceSource(kubeClient kubernetes.Interface, namespace, annotationFilter string, fqdnTemplate string, combineFqdnAnnotation bool, compatibility string, publishInternal bool, publishHostIP bool, serviceTypeFilter []string) (Source, error) {
+func NewServiceSource(kubeClient kubernetes.Interface, namespace, annotationFilter string, fqdnTemplate string, combineFqdnAnnotation bool, compatibility string, publishInternal bool, publishHostIP bool, serviceTypeFilter []string, servicePublishIPsType string) (Source, error) {
 	var (
 		tmpl *template.Template
 		err  error
@@ -88,6 +89,7 @@ func NewServiceSource(kubeClient kubernetes.Interface, namespace, annotationFilt
 		publishInternal:       publishInternal,
 		publishHostIP:         publishHostIP,
 		serviceTypeFilter:     serviceTypes,
+		servicePublishIPsType: servicePublishIPsType,
 	}, nil
 }
 
@@ -399,11 +401,18 @@ func (sc *serviceSource) extractNodeTargets() (endpoint.Targets, error) {
 		}
 	}
 
-	if len(externalIPs) > 0 {
+	switch sc.servicePublishIPsType {
+	case "private":
+		return internalIPs, nil
+	case "public":
 		return externalIPs, nil
-	}
+	default:
+		if len(externalIPs) > 0 {
+			return externalIPs, nil
+		}
 
-	return internalIPs, nil
+		return internalIPs, nil
+	}
 }
 
 func (sc *serviceSource) extractNodePortEndpoints(svc *v1.Service, nodeTargets endpoint.Targets, hostname string, ttl endpoint.TTL) []*endpoint.Endpoint {
